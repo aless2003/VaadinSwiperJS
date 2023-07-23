@@ -1,0 +1,16 @@
+swiper-container {
+  max-width: 100%;
+  max-height: 100%;
+  /* Make it so slides are always contained within the container. Useful for when slides are larger than the container. */
+  overflow: hidden;
+}
+
+swiper-slide {
+  max-height: 100%;
+  max-width: 100%;
+}
+
+swiper-slide > img {
+  max-height: 100%;
+  max-width: 100%;
+}

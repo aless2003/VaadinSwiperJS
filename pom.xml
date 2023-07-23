@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.vaadin.addons.mygroup</groupId>
-    <artifactId>axa-input-text</artifactId>
+    <groupId>org.vaadin.addons.online.hatsunemiku.diamond</groupId>
+    <artifactId>FlowSwiper</artifactId>
 
     <!-- Add-on version number. Snapshot is good for development,
     but when publishing, make sure to use semantic version number like '1.0.0'.
     See https://semver.org/ -->
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.1</version>
 
     <!-- Change this. The name is used when you publish to Vaadin Directory.
     Make sure to use a unique name by first searching at https://vaadin.com/directory -->
-    <name>AXA Input Text</name>
-    <description>Integration of axa-input-text for Vaadin platform</description>
+    <name>Flow Swiper</name>
+    <description>Integration of SwiperJS for the Vaadin platform</description>
 
     <properties>
 
         <!-- This is the Vaadin version your addon is built for.
         Choose the oldest version you plan to support.
         More about Vaadin versions at https://vaadin.com/roadmap#support -->
-        <vaadin.version>24.1.3</vaadin.version>
+        <vaadin.version>24.0.0</vaadin.version>
 
         <!-- Java version your add-on supports.
         This should align with the Vaadin version.
@@ -34,7 +34,7 @@
         <jetty.version>11.0.13</jetty.version>
 
         <!-- Vaadin add-on metadata -->
-        <vaadin.addon.owner>Add-on Author Name</vaadin.addon.owner>
+        <vaadin.addon.owner>Alessandro Schwaiger aka. Diamond</vaadin.addon.owner>
         <vaadin.addon.license>Apache License 2.0</vaadin.addon.license>
         <vaadin.addon.name>${project.name}</vaadin.addon.name>
         <vaadin.addon.jar>${project.build.finalName}.${project.packaging}</vaadin.addon.jar>
@@ -43,15 +43,15 @@
     <organization>
         <!-- Name of the add-on author and URL.
         Update these to match your own name and website. -->
-        <name>Add-on Author Name</name>
-        <url>https://vaadin.com/directory</url>
+        <name>Alessandro Schwaiger aka. Diamond</name>
+        <url>https://hatsune-miku.online/</url>
     </organization>
     <licenses>
         <license>
             <!-- The license of this add-on.
             We recommend to use the same Apache 2 open source license like Vaadin itself. -->
-            <name>Apache 2</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <name>MIT</name>
+            <url>https://mit-license.org/</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -111,6 +111,12 @@
             -->
             <artifactId>flow-server</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-html-components</artifactId>
+        </dependency>
+
         <!-- Shouldn't be needed, probably a bug the flow-client is not brought in via flow-server-->
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -134,10 +140,12 @@
             <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-testbench</artifactId>
-            <scope>test</scope>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.28</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
