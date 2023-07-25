@@ -1,5 +1,6 @@
 package org.vaadin.addons.online.hatsunemiku.diamond.swiper;
 
+import java.util.Objects;
 import org.vaadin.addons.online.hatsunemiku.diamond.swiper.constants.Direction;
 import org.vaadin.addons.online.hatsunemiku.diamond.swiper.constants.LanguageDirection;
 import org.vaadin.addons.online.hatsunemiku.diamond.swiper.event.BreakpointEvent;
@@ -134,11 +135,89 @@ public class Swiper extends Component implements HasComponents {
    */
   @Override
   public void add(Component... components) {
-    List<Component> slides = Arrays.stream(components)
-        .map(c -> new Slide(c, lazyLoading))
-        .collect(Collectors.toList());
+    List<Component> slides = getSlidesFromComponents(components);
 
     add(slides);
+  }
+
+  /**
+   * Adds the given components to the Swiper at the beginning. This means that Component index 0 in
+   * the array will be the first slide, the second component in the array will be the second slide,
+   * and so on.
+   *
+   * @param components the components to add to the Swiper.
+   */
+  public void addAtBeginning(Component... components) {
+    List<Component> slides = getSlidesFromComponents(components);
+
+    for (int i = slides.size() - 1; i >= 0; i--) {
+      getElement().insertChild(i, slides.get(i).getElement());
+    }
+  }
+
+  /**
+   * Wraps all the given components in {@link Slide slides} and returns a {@link List} of them.
+   *
+   * @param components The components to wrap in slides.
+   * @return A {@link List} of {@link Slide slides} containing the given components.
+   * @throws IllegalArgumentException if any of the components is null.
+   */
+  private List<Component> getSlidesFromComponents(Component[] components) {
+
+    if (Arrays.stream(components).anyMatch(Objects::isNull)) {
+      throw new IllegalArgumentException("Components cannot be null");
+    }
+
+    return Arrays.stream(components)
+        .map(c -> new Slide(c, lazyLoading))
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Adds the given component to the Swiper at the beginning. Meaning it will be the first slide.
+   *
+   * @param component The component to add to the Swiper.
+   */
+  public void addAtBeginning(Component component) {
+    addAtBeginning(new Component[]{component});
+  }
+
+  /**
+   * Adds the given components to the Swiper at the index specified. This means that the first
+   * component in the array will be the slide at the given index, the second component in the array
+   * will be the slide at the index + 1, and so on.
+   *
+   * @param index      The index to add the components at.
+   * @param components The components to add to the Swiper.
+   * @throws IndexOutOfBoundsException if the index is smaller than 0 or bigger than the number of
+   *                                   current slides.
+   */
+  public void add(int index, Component... components) {
+
+    int childCount = getElement().getChildCount();
+
+    if (index < 0 || index > childCount) {
+      throw new IndexOutOfBoundsException("Index must be between 0 and " + childCount);
+    }
+
+    List<Component> slides = getSlidesFromComponents(components);
+
+    for (int i = slides.size() - 1; i >= 0; i--) {
+      getElement().insertChild(index, slides.get(i).getElement());
+    }
+  }
+
+  /**
+   * Adds the given component to the Swiper at the index specified. Meaning it will be the slide at
+   * the given index.
+   *
+   * @param index     The index to add the component at.
+   * @param component The component to add to the Swiper.
+   * @throws IndexOutOfBoundsException if the index is smaller than 0 or bigger than the number of
+   *                                   current slides.
+   */
+  public void add(int index, Component component) {
+    add(index, new Component[]{component});
   }
 
   private void addListeners() {
@@ -1389,7 +1468,8 @@ public class Swiper extends Component implements HasComponents {
   }
 
   /**
-   * Recalculate number of slides and their offsets. Useful after you add/remove slides with JavaScript.
+   * Recalculate number of slides and their offsets. Useful after you add/remove slides with
+   * JavaScript.
    */
   public void updateSlides() {
     getElement().callJsFunction("swiper.updateSlides");
