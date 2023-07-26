@@ -150,7 +150,7 @@ public class Swiper extends Component implements HasComponents {
   public void addAtBeginning(Component... components) {
     List<Component> slides = getSlidesFromComponents(components);
 
-    for (int i = slides.size() - 1; i >= 0; i--) {
+    for (int i = 0; i < slides.size(); i++) {
       getElement().insertChild(i, slides.get(i).getElement());
     }
   }
@@ -202,8 +202,8 @@ public class Swiper extends Component implements HasComponents {
 
     List<Component> slides = getSlidesFromComponents(components);
 
-    for (int i = slides.size() - 1; i >= 0; i--) {
-      getElement().insertChild(index, slides.get(i).getElement());
+    for (int i = 0; i < slides.size(); i++) {
+      getElement().insertChild(index + i, slides.get(i).getElement());
     }
   }
 
