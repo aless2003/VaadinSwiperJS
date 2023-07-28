@@ -86,6 +86,11 @@ public class Swiper extends Component implements HasComponents {
   private static final Logger logger = LoggerFactory.getLogger(Swiper.class);
   private final boolean lazyLoading;
   private int activeIndex;
+  /**
+   * The {@link LanguageDirection language direction} of the Swiper. This is NOT updated if the DOM
+   * is manipulated directly.
+   */
+  private LanguageDirection languageDirection;
 
   public Swiper() {
     getElement().setAttribute("events-prefix", "flow-swiper-");
@@ -1156,6 +1161,7 @@ public class Swiper extends Component implements HasComponents {
    */
   public void changeLanguageDirection(LanguageDirection direction) {
     getElement().callJsFunction("swiper.changeLanguageDirection", direction.value);
+    this.languageDirection = direction;
   }
 
   /**
@@ -1482,5 +1488,13 @@ public class Swiper extends Component implements HasComponents {
     getElement().callJsFunction("swiper.updateSlidesClasses");
   }
 
-
+  /**
+   * Returns the current {@link LanguageDirection language direction} of the Swiper. This value is
+   * NOT updated when the DOM is manipulated directly.
+   *
+   * @return The current {@link LanguageDirection language direction} of the Swiper.
+   */
+  public LanguageDirection getLanguageDirection() {
+    return languageDirection;
+  }
 }
