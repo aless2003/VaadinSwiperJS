@@ -1161,6 +1161,7 @@ public class Swiper extends Component implements HasComponents {
    */
   public void changeLanguageDirection(LanguageDirection direction) {
     getElement().callJsFunction("swiper.changeLanguageDirection", direction.value);
+    this.languageDirection = direction;
   }
 
   /**
