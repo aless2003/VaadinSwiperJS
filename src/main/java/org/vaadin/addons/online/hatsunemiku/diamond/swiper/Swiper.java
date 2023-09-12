@@ -1,6 +1,7 @@
 package org.vaadin.addons.online.hatsunemiku.diamond.swiper;
 
 import java.util.Objects;
+import lombok.Getter;
 import org.vaadin.addons.online.hatsunemiku.diamond.swiper.constants.Direction;
 import org.vaadin.addons.online.hatsunemiku.diamond.swiper.constants.LanguageDirection;
 import org.vaadin.addons.online.hatsunemiku.diamond.swiper.event.BreakpointEvent;
@@ -72,6 +73,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vaadin.addons.online.hatsunemiku.diamond.swiper.event.zoom.ZoomChangeEvent;
 
 /**
  * Wrapper component the SwiperJS Web Component. CSS parts available for styling can be found <a
@@ -90,14 +92,60 @@ public class Swiper extends Component implements HasComponents {
    * The {@link LanguageDirection language direction} of the Swiper. This is NOT updated if the DOM
    * is manipulated directly.
    */
+  @Getter
   private LanguageDirection languageDirection;
 
-  public Swiper() {
+  /**
+   * Initializes a new instance of the Swiper class with the provided configuration. If a null
+   * configuration is provided, a default configuration will be used.
+   *
+   * @param config The configuration for the Swiper instance.
+   */
+  public Swiper(SwiperConfig config) {
+
+    if (config == null) {
+      config = SwiperConfig.builder().build();
+    }
+
     getElement().setAttribute("events-prefix", "flow-swiper-");
-    SwiperConfig defaultConfig = SwiperConfig.builder().build();
-    this.lazyLoading = defaultConfig.isLazy();
-    setConfigParams(defaultConfig);
+
+    initSwiper(config);
+
+    this.lazyLoading = config.isLazy();
+    setConfigParams(config);
     addListeners();
+  }
+
+  /**
+   * Creates a new instance of the Swiper class. This constructor initializes the Swiper object with
+   * a {@link SwiperConfig} w.
+   */
+  public Swiper() {
+    this((SwiperConfig) null);
+  }
+
+  private void initSwiper(SwiperConfig defaultConfig) {
+    String swiperInitCode = """
+        const swiperParams = {
+          zoom: {
+            enabled: $1,
+            maxRatio: $2,
+            minRatio: $3,
+            toggle: $4
+          }
+        };
+                
+        Object.assign($0, swiperParams);
+                
+        $0.initialize();
+        """;
+
+    getElement().executeJs(swiperInitCode,
+        getElement(),
+        defaultConfig.isZoom(),
+        defaultConfig.getMaxZoomRatio(),
+        defaultConfig.getMinZoomRatio(),
+        defaultConfig.isZoomToggle());
   }
 
 
@@ -107,8 +155,7 @@ public class Swiper extends Component implements HasComponents {
    * @param components The components to add to the Swiper.
    */
   public Swiper(Component... components) {
-    this();
-    add(components);
+    this(null, components);
   }
 
   /**
@@ -119,18 +166,8 @@ public class Swiper extends Component implements HasComponents {
    * @param components The components to add to the Swiper.
    */
   public Swiper(SwiperConfig config, Component... components) {
-    this(components);
-    setConfigParams(config);
-  }
-
-  /**
-   * Constructor with a {@link SwiperConfig config} to configure the Swiper.
-   *
-   * @param config The {@link SwiperConfig config} to configure the Swiper.
-   */
-  public Swiper(SwiperConfig config) {
-    this();
-    setConfigParams(config);
+    this(config);
+    add(components);
   }
 
   /**
@@ -143,6 +180,32 @@ public class Swiper extends Component implements HasComponents {
     List<Component> slides = getSlidesFromComponents(components);
 
     add(slides);
+  }
+
+  /**
+   * Adds the given components to this component and wraps them in
+   * {@link ZoomableSlide zoomable slides} to make them zoomable.
+   *
+   * @param imageElement true if the components are image elements, false otherwise.
+   * @param components   the components to add to the Swiper.
+   */
+  public void addZoomable(boolean imageElement, Component... components) {
+    List<Component> slides = getZoomableSlidesFromComponents(components, imageElement);
+
+    add(slides);
+  }
+
+  /**
+   * Adds the given component to this component and wraps it in a
+   * {@link ZoomableSlide zoomable slide} to make it zoomable.
+   *
+   * @param component    the component to add to the Swiper.
+   * @param imageElement true if the component is an
+   *                     {@link com.vaadin.flow.component.html.Image img}, picture or canvas
+   *                     element, false otherwise.
+   */
+  public void addZoomable(Component component, boolean imageElement) {
+    addZoomable(imageElement, component);
   }
 
   /**
@@ -175,6 +238,28 @@ public class Swiper extends Component implements HasComponents {
 
     return Arrays.stream(components)
         .map(c -> new Slide(c, lazyLoading))
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Wraps all the given components in {@link ZoomableSlide zoomable slides} and returns a
+   * {@link List} of them.
+   *
+   * @param components   The components to wrap in zoomable slides.
+   * @param imageElement The flag indicating whether the components are image elements.
+   * @return A {@link List} of {@link ZoomableSlide zoomable slides} containing the given
+   * components.
+   * @throws IllegalArgumentException if any of the components is null.
+   */
+  private List<Component> getZoomableSlidesFromComponents(Component[] components,
+      boolean imageElement) {
+
+    if (Arrays.stream(components).anyMatch(Objects::isNull)) {
+      throw new IllegalArgumentException("Components cannot be null");
+    }
+
+    return Arrays.stream(components)
+        .map(c -> new ZoomableSlide(c, lazyLoading, imageElement))
         .collect(Collectors.toList());
   }
 
@@ -1076,6 +1161,10 @@ public class Swiper extends Component implements HasComponents {
     return super.addListener(UpdateEvent.class, listener);
   }
 
+  public Registration addZoomChangeEventListener(ComponentEventListener<ZoomChangeEvent> listener) {
+    return super.addListener(ZoomChangeEvent.class, listener);
+  }
+
   /**
    * Run transition to the next {@link Slide}.
    *
@@ -1489,12 +1578,42 @@ public class Swiper extends Component implements HasComponents {
   }
 
   /**
-   * Returns the current {@link LanguageDirection language direction} of the Swiper. This value is
-   * NOT updated when the DOM is manipulated directly.
+   * enable/disable zooming for {@link ZoomableSlide} elements in Swiper.
    *
-   * @return The current {@link LanguageDirection language direction} of the Swiper.
+   * @param enabled true to enable zoom, false to disable zoom
    */
-  public LanguageDirection getLanguageDirection() {
-    return languageDirection;
+  public void enableZoom(boolean enabled) {
+    if (enabled) {
+      getElement().callJsFunction("swiper.zoom.enable");
+    } else {
+      getElement().callJsFunction("swiper.zoom.disable");
+    }
+  }
+
+  /**
+   * Zoom in to the current {@link ZoomableSlide} element in Swiper with the specified zoom ratio.
+   * This will ignore {@link SwiperConfig#getMaxZoomRatio()}
+   *
+   * @param ratio the zoom ratio to apply
+   */
+  public void zoomIn(double ratio) {
+    getElement().callJsFunction("swiper.zoom.in", ratio);
+  }
+
+  /**
+   * Zoom out from the current {@link ZoomableSlide} element in Swiper. This will reset the zoom
+   * ratio to its default value.
+   */
+  public void zoomOut() {
+    getElement().callJsFunction("swiper.zoom.out");
+  }
+
+  /**
+   * Toggle the zoom state of the current {@link ZoomableSlide} element in Swiper. If the element is
+   * currently zoomed in, this method will zoom out the element. If the element is currently zoomed
+   * out, this method will zoom in the element.
+   */
+  public void toggleZoom() {
+    getElement().callJsFunction("swiper.zoom.toggle");
   }
 }

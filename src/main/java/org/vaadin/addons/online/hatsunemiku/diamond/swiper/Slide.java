@@ -21,6 +21,10 @@ public class Slide extends Component implements HasComponents {
     setLazy(lazy);
   }
 
+  protected Slide(boolean lazy) {
+    setLazy(lazy);
+  }
+
   private void setLazy(boolean lazy) {
     getElement().setProperty("lazy", lazy);
   }
