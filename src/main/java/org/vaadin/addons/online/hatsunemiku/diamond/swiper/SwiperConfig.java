@@ -13,6 +13,7 @@ import lombok.NonNull;
 @Getter
 @Builder
 public class SwiperConfig {
+
   /**
    * Number of slides per view (slides visible at the same time on slider's container). Set to -1
    * for 'auto'
@@ -515,7 +516,8 @@ public class SwiperConfig {
    * for touch events on {@link Swiper}) or {@link TouchEventsTarget#WRAPPER} (to listen for touch
    * events on {@link Swiper}'s wrapper).
    */
-  @Default @NonNull
+  @Default
+  @NonNull
   private TouchEventsTarget touchEventsTarget = TouchEventsTarget.WRAPPER;
   /**
    * If set to 'true', then propagation of "touchmove" will be stopped.
@@ -603,11 +605,28 @@ public class SwiperConfig {
    * By changing this parameter you will also need to change {@link Swiper Swiper's} CSS to reflect
    * changed classes
    */
-  @Default @NonNull
+  @Default
+  @NonNull
   private String wrapperClass = "swiper-wrapper";
   /**
    * Enables zooming functionality.
    */
   @Default
   private boolean zoom = false;
+
+  /**
+   * The maximum zoom ratio allowed. This variable determines the maximum allowed zoom ratio that
+   * can be applied. The default value is 3.
+   */
+  @Default
+  private int maxZoomRatio = 3;
+  /**
+   * The minimum zoom ratio allowed. This variable determines the minimum allowed zoom ratio that
+   * can be applied. The default value is 1.
+   */
+  @Default
+  private int minZoomRatio = 1;
+
+  @Default
+  private boolean zoomToggle = true;
 }
